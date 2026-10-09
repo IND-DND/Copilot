@@ -1,0 +1,55 @@
+{
+  "dataset": "risan/quran-json",
+  "commit": "6523a9ad3b73bb7e8cb3a9cdf0ea774b8bab3123",
+  "source_url": "https://github.com/risan/quran-json",
+  "dataset_license": "CC BY-SA 4.0",
+  "checksums": {
+    "arabic.json": "adaebb377c60eba1bab6ef652959c7a0b4ccb4d0ca42145945c14ecdbeb4b761",
+    "english.json": "c12b5bed64837cb744e075fdd3b79f885aee1522d92468f36c38ff565bfdc439",
+    "hindi.json": "ce5463c940e83f6a8e3cefa4d49fac2e30f8aecc1e9805ab7d8daebfe25a0a1a",
+    "chapters.json": "5b18adae945fcb6f9fbb865dd7dc596f89a63607a4e6617ca9e37f7f10d3386b"
+  },
+  "arabic": {
+    "publisher": "Tanzil Project",
+    "script": "Uthmani, Hafs",
+    "license": "CC BY 3.0; verbatim only",
+    "url": "https://tanzil.net/docs/text_license",
+    "notice": "Tanzil Quran Text. Copyright (C) 2007-2021 Tanzil Project. License: Creative Commons Attribution 3.0. This copy of the Quran text is carefully produced, highly verified and continuously monitored by a group of specialists in Tanzil Project. TERMS OF USE: Permission is granted to copy and distribute verbatim copies of this text, but CHANGING IT IS NOT ALLOWED. This Quran text can be used in any website or application, provided that its source (Tanzil Project) is clearly indicated, and a link is made to tanzil.net to enable users to keep track of changes. This copyright notice shall be included in all verbatim copies of the text, and shall be reproduced appropriately in all files derived from or containing substantial portion of this text. Please check updates at: http://tanzil.net/updates/"
+  },
+  "translations": [
+    {
+      "key": "english_saheeh",
+      "lang": "en",
+      "direction": "ltr",
+      "version": "1.1.2",
+      "title": "English Translation - Noor International Center",
+      "description": "Issued by Noor International Center.",
+      "database_url": "https://quranenc.com/downloads/sqlite/english_saheeh.zip"
+    },
+    {
+      "key": "hindi_omari",
+      "lang": "hi",
+      "direction": "ltr",
+      "version": "1.1.5",
+      "title": "Hindi Translation - Azizul Haq Al-Omari",
+      "description": "Translated by Azizul Haq Al-Omari",
+      "database_url": "https://quranenc.com/downloads/sqlite/hindi_omari.zip"
+    }
+  ],
+  "translation_terms": {
+    "url": "https://quranenc.com/en/home/api",
+    "conditions": [
+      "No modification, addition, or deletion of translation contents.",
+      "Credit the publisher and QuranEnc.com.",
+      "State the translation version and retain transcript information.",
+      "Report notes to QuranEnc.com and keep the edition up to date.",
+      "No inappropriate advertising."
+    ]
+  },
+  "mirror_files": {
+    "arabic.json": "data/tanzil/uthmani.json",
+    "english.json": "data/quranenc/english_saheeh.json",
+    "hindi.json": "data/quranenc/hindi_omari.json",
+    "chapters.json": "data/tanzil/chapters.json"
+  }
+}

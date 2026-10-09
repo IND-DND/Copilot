@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#153f36">
+  <meta name="description" content="Explore the Quran and selected Hadith sources with cited English and Hindi translations.">
+  <title>Noor — A little light, a deeper understanding</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar" aria-label="Workspace navigation">
+    <a class="brand" href="/" aria-label="Noor home"><span class="brand-mark">✦</span><span>noor<span class="brand-dot">.</span></span></a>
+    <p class="brand-subtitle">ISLAMIC KNOWLEDGE COMPANION</p>
+    <button class="new-chat" id="new-chat"><span>＋</span> New conversation <span class="key-hint">N</span></button>
+    <div class="nav-section-title">YOUR WORKSPACE</div>
+    <button class="nav-item active" id="conversation-tab"><span>◌</span> Conversation <span class="nav-badge">1</span></button>
+    <button class="nav-item" id="sources-button"><span>▤</span> Sources &amp; references <span class="nav-arrow">↗</span></button>
+    <div class="sidebar-divider"></div>
+    <div class="nav-section-title">EXPLORE A TOPIC</div>
+    <button class="topic" data-question="What does the Quran say about charity?"><span>♡</span> Charity &amp; kindness</button>
+    <button class="topic" data-question="What are the Hadiths about prayer times?"><span>☼</span> Prayer &amp; worship</button>
+    <button class="topic" data-question="What does the Quran say about patience?"><span>❧</span> Patience &amp; gratitude</button>
+    <button class="topic" data-question="What does the Quran say about knowledge?"><span>▧</span> Knowledge &amp; reflection</button>
+    <div class="sidebar-bottom">
+      <div class="source-note"><span class="source-star">✧</span><div><strong>Rooted in reliable sources</strong><p>Every passage comes with a reference. Explore with care and context.</p></div></div>
+      <div class="sidebar-foot"><span class="online-dot"></span><span id="connection-status">Checking library…</span><span class="version-label">v0.1</span></div>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div class="breadcrumb"><span class="mobile-brand">✦ noor.</span><span class="desktop-breadcrumb">Your workspace <span>/</span></span><strong>Conversation</strong></div>
+      <div class="header-actions"><button id="mobile-new-chat" class="mobile-action" aria-label="New conversation">＋</button><button id="mobile-sources" class="mobile-action" aria-label="Sources and references">▤</button><span class="private-note">◈ <span>No account required</span></span><button id="about-button" class="about-button" aria-label="About Noor">i</button></div>
+    </header>
+
+    <div class="content-area" id="content-area">
+      <section id="welcome" class="welcome">
+        <div class="welcome-emblem" aria-hidden="true"><span>✦</span></div>
+        <div class="eyebrow">IN THE NAME OF ALLAH, THE MOST MERCIFUL</div>
+        <h1>A little light.<br><em>A deeper understanding.</em></h1>
+        <p class="intro">A thoughtful space to explore the Quran and Hadith.<br>Ask, reflect, and discover — with sources you can return to.</p>
+        <div class="capabilities"><span>◇ Cited sources</span><span>◉ English &amp; Hindi</span><span>✧ Arabic text</span></div>
+        <div class="suggestion-grid">
+          <button class="suggestion" data-question="What does the Quran say about charity?"><span class="card-icon">♡</span><span class="card-category">QURAN · REFLECTION</span><strong>What does the Quran<br>say about charity?</strong><span class="card-arrow">↗</span></button>
+          <button class="suggestion" data-question="Can you translate Surah Al-Fatiha into Hindi?"><span class="card-icon hindi-icon">अ</span><span class="card-category">TRANSLATION · HINDI</span><strong>Read Surah Al-Fatiha<br>with its Hindi meaning.</strong><span class="card-arrow">↗</span></button>
+          <button class="suggestion" data-question="What are the Hadiths about prayer times?"><span class="card-icon">☼</span><span class="card-category">HADITH · DAILY LIFE</span><strong>What do Hadiths tell us<br>about prayer times?</strong><span class="card-arrow">↗</span></button>
+          <button class="suggestion" data-question="What does the Quran say about patience?"><span class="card-icon">❧</span><span class="card-category">QURAN · PERSONAL GROWTH</span><strong>Find guidance on<br>patience and hardship.</strong><span class="card-arrow">↗</span></button>
+        </div>
+        <div class="welcome-footnote">“Guide us to the straight path.” <span>— Quran 1:6, English meaning</span></div>
+      </section>
+
+      <section class="messages" id="messages" aria-label="Conversation" aria-live="polite" aria-relevant="additions"></section>
+    </div>
+
+    <div class="composer-area">
+      <form class="composer" id="chat-form">
+        <label class="sr-only" for="question">Your question about Islamic texts</label>
+        <textarea id="question" rows="1" maxlength="2000" placeholder="Ask a question, or explore a verse…" required></textarea>
+        <div class="composer-controls">
+          <div class="composer-settings">
+            <label class="select-label" for="language"><span>◎</span><select id="language" aria-label="Response language"><option value="en">English</option><option value="hi">हिंदी</option></select></label>
+            <span class="control-divider"></span>
+            <select id="scope" aria-label="Source selection"><option value="all">All sources</option><option value="quran">Quran</option><option value="hadith">Hadith</option></select>
+          </div>
+          <div class="send-controls"><span class="enter-hint">Enter to send</span><button id="send-button" type="submit" aria-label="Send question">↑</button></div>
+        </div>
+      </form>
+      <p class="composer-disclaimer">Noor is an AI knowledge assistant. For personal religious rulings, consult a qualified scholar.</p>
+      <div class="composer-error" id="composer-error" role="alert"></div>
+    </div>
+  </main>
+
+  <dialog id="sources-dialog" aria-labelledby="sources-title">
+    <div class="dialog-heading"><div><div class="eyebrow">KNOWLEDGE WITH CONTEXT</div><h2 id="sources-title">Sources &amp; references</h2></div><button class="close-dialog" aria-label="Close sources">×</button></div>
+    <div id="sources-content"><p>Loading source information…</p></div>
+  </dialog>
+  <dialog id="about-dialog" aria-labelledby="about-title">
+    <div class="dialog-heading"><h2 id="about-title">A thoughtful companion</h2><button class="close-dialog" aria-label="Close about">×</button></div>
+    <p>Noor helps you explore Islamic texts through source retrieval. It is an AI assistant, not a qualified scholar. Interpretations and legal opinions can differ.</p>
+    <p>The local library contains all 6,236 Quran verses with English and Hindi translations, and five original Hadith summaries from Sunni collections. Published translations and translator footnotes are displayed verbatim with their references.</p>
+    <p>An optional local Ollama model can add explanations. Its output is labeled separately and may need review. Without a model, Noor displays retrieved passages directly.</p>
+    <p>Conversations stay in this page's memory and are cleared when you reload. The application does not save chat history. Optional source lookups request fixed JSON datasets; an optional model receives your question and retrieved passages locally.</p>
+  </dialog>
+</body>
+</html>

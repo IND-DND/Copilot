@@ -1,0 +1,21 @@
+services:
+  noor:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      NOOR_ENABLE_EXTERNAL: "true"
+      NOOR_OLLAMA_ENABLED: "${NOOR_OLLAMA_ENABLED:-true}"
+      NOOR_OLLAMA_URL: "http://127.0.0.1:11434"
+      NOOR_OLLAMA_MODEL: "qwen2.5:1.5b"
+    restart: unless-stopped
+  ollama:
+    image: ollama/ollama:0.6.8
+    profiles: ["llm"]
+    # Share Noor's network namespace so the model stays on loopback.
+    network_mode: "service:noor"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+volumes:
+  ollama-models:
