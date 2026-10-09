@@ -3,12 +3,11 @@
 import asyncio
 import hashlib
 import json
-import re
 from urllib.parse import urlsplit
 
 import httpx
 
-from .prompts import SYSTEM_PROMPT
+from .model_output import checked_summary, model_messages
 from .schemas import Evidence
 
 
@@ -106,10 +105,7 @@ class LocalModel:
         schema = {"type": "object", "properties": {"summary": {"type": "string"}, "citations": {"type": "array", "items": {"type": "string", "enum": evidence_ids}, "minItems": 1}}, "required": ["summary", "citations"], "additionalProperties": False}
         payload = {
             "model": self.settings.ollama_model, "stream": False, "format": schema,
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": json.dumps({"question": question, "language": "Hindi" if language == "hi" else "English", "evidence": [{"id": s.id, "reference": s.reference, "text": s.text, "note": s.note} for s in sources]}, ensure_ascii=False)},
-            ],
+            "messages": model_messages(question, language, sources),
             "options": {"temperature": 0, "num_predict": 450, "num_ctx": 8192},
         }
         client = self.client or httpx.AsyncClient(timeout=45, trust_env=False)
@@ -117,22 +113,7 @@ class LocalModel:
             async with self.slots:
                 response = await client.post(self.settings.ollama_url + "/api/chat", json=payload)
                 response.raise_for_status()
-            data = json.loads(response.json()["message"]["content"])
-            summary = data.get("summary")
-            cited = data.get("citations")
-            allowed = {s.id for s in sources}
-            if not isinstance(summary, str) or not summary.strip() or len(summary) > 2500 or not isinstance(cited, list) or not cited or not all(isinstance(c, str) and c in allowed for c in cited):
-                return None, "rejected"
-            # Never present a model's new source link or invented numbered reference.
-            valid_refs = {match for s in sources for match in re.findall(r"\b\d{1,3}:\d{1,3}\b", s.reference)}
-            if re.search(r"https?://|www\.|[\u0600-\u06ff]|[\"“”]", summary) or any(ref not in valid_refs for ref in re.findall(r"\b\d{1,3}:\d{1,3}\b", summary)):
-                return None, "rejected"
-            hadith_refs = re.findall(r"\b(bukhari|muslim)\s*[:#]?\s*(\d+[a-z]?)\b", summary.lower())
-            if any(f"{collection}-{number}" not in allowed for collection, number in hadith_refs):
-                return None, "rejected"
-            if language == "hi" and not re.search(r"[\u0900-\u097f]", summary):
-                return None, "rejected"
-            return summary.strip(), "used"
+            return checked_summary(response.json()["message"]["content"], language, sources)
         except (httpx.HTTPError, json.JSONDecodeError, KeyError, TypeError, AttributeError):
             return None, "unavailable"
         finally:

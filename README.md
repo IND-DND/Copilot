@@ -1,16 +1,59 @@
 # Noor · Islamic knowledge chatbot
 
-A runnable, source-grounded chatbot based on the supplied Islamic knowledge assistant prompt. It has a responsive chat interface, English/Hindi language selection, Arabic Quran passages, citations, translator footnotes, and optional server-side Ollama explanations. It works without a paid inference API key.
+A runnable, source-grounded chatbot based on the supplied Islamic knowledge assistant prompt. It has English/Hindi language selection, Arabic Quran passages, citations, translator footnotes, and optional cloud model explanations. It works without a paid inference API key.
 
 ## Run entirely in the cloud
 
-Visitors need only a browser. The application, text library, and Ollama model run
-on the cloud server, with no installation or model files on the visitor's computer.
-Chats are held in page memory and cleared on reload; the app uses no browser
-storage, cookies, or conversation database. HTTP responses request `no-store`.
+Visitors need only a browser. The application, text library, and model run on the
+cloud server, with no installation or model files on the visitor's computer.
+The application has no conversation database or saved browser chat history.
 The browser still needs to load and display the interface in memory.
 
-The default cloud package targets a **Hugging Face Docker Space**. Hugging Face is
+### Free Hugging Face ZeroGPU
+
+The free cloud package uses **Gradio and Qwen3-4B-Instruct-2507 on ZeroGPU**.
+This replaces the Ollama daemon for this hosting option. The model is Apache 2.0,
+pinned to a verified upstream revision; cloud weights are never shipped to visitors.
+Eligible free accounts (verified email, older than 30 days, in good standing) can
+host up to two ZeroGPU Spaces. No paid hardware or storage is requested.
+
+GPU queues and daily visitor quotas apply. Switch off **AI explanation** to read
+verified passages without consuming GPU quota. GPU errors also preserve source
+results. Free Spaces can sleep. Questions are processed on Hugging Face; session
+context stays in server memory for up to one hour. Hosting platform logging follows
+Hugging Face's policies. The UI never saves chat history in browser storage.
+
+Public demo: https://huggingface.co/spaces/Skhan059/noor-islamic-assistant
+
+From this **cloud workspace**:
+
+```bash
+export UV_CACHE_DIR=/workspace/.cache/uv
+export HF_HOME=/workspace/.cache/noor-huggingface
+uv sync --locked --group deploy --group free-ui
+uv run --frozen --group deploy python scripts/deploy_space.py --runtime zerogpu --dry-run
+uv run --frozen --group deploy python scripts/deploy_space.py --runtime zerogpu
+```
+
+Supply `NOOR_HF_TOKEN` securely as described below. To update your existing free
+Space, add `--space-id ACCOUNT/NAME --update`. Verify the actual hosted app:
+
+```bash
+uv run --frozen --group free-ui python scripts/free_space_smoke.py --base-url "$NOOR_CLOUD_URL"
+```
+
+This check requires real English and Hindi model explanations, plus charity,
+all seven Hindi Al-Fatiha verses with footnotes, and prayer-time Hadith sources.
+`--sources-only` explicitly skips model validation. For account-authenticated
+free quota, add `--account-quota --space-id ACCOUNT/NAME`. This exchanges the
+deployment credential at huggingface.co for a short-lived access token scoped
+to the selected Space; credentials stay in cloud memory and are never uploaded.
+The 52 automated tests pass, including the Hindi structured-generation regression;
+mocked model tests are not proof of live inference. See `deploy/zerogpu/`.
+
+### Ollama on a cloud server
+
+The Ollama cloud package targets a **Hugging Face Docker Space**. Hugging Face is
 a managed host for this open-source application. For an open-source hosting
 control panel on your own cloud server, use **Coolify** with the Docker Compose
 deployment below.
@@ -20,7 +63,9 @@ Ollama runtime. `deploy/huggingface/README.md` sets the Space's port to 7860. Th
 model downloads onto the cloud server at startup; source retrieval is available
 while it downloads or if it fails. Model files use ephemeral server storage and
 may download again after a restart. No persistent volume is required. The
-deployment script does not request paid hardware.
+deployment script does not request paid hardware. Creating Docker Spaces now
+requires Hugging Face PRO membership even on CPU Basic; use ZeroGPU for the free
+deployment, or an existing Coolify server for Ollama.
 
 From this **cloud workspace**, prepare and publish using a Hugging Face account:
 
@@ -50,13 +95,14 @@ retrieval fallback, or `model_enabled=true` does not establish live inference.
 The prepared configuration alone does not create a live website. Hosting account
 access and a successful build are required.
 
-Current validation: the 44-test suite, cloud container, cited source requests,
+Ollama validation: the cloud container, cited source requests,
 and browser storage checks passed. Live English explanations passed after
 restricting citation generation to supplied evidence IDs. The default small
 model's Hindi explanation check failed; Noor rejects that response and displays
 the verified Hindi passages instead. A larger model download was interrupted by
 the cloud environment restart and then blocked by the network proxy. Hindi model
-explanations and the public hosted deployment still require successful validation.
+explanations remain unverified for this small Ollama model. This does not describe
+the separate Qwen3 ZeroGPU runner; verify it with the Gradio smoke script above.
 
 ## Development on a server
 

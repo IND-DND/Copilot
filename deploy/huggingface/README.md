@@ -1,6 +1,6 @@
 ---
 title: Noor · Islamic knowledge assistant
-emoji: ✦
+emoji: 🌙
 colorFrom: green
 colorTo: yellow
 sdk: docker

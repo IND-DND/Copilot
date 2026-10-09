@@ -1,4 +1,4 @@
-"""Publish an allowlisted application bundle to a Hugging Face Docker Space.
+"""Publish an allowlisted application bundle to a Hugging Face Space.
 
 Run from this cloud workspace. Supply NOOR_HF_TOKEN through secure environment
 settings, never as a command argument. No token, model cache, or chat is uploaded.
@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def stage(destination):
+def stage(destination, runtime="docker"):
     files = []
     for directory in ("app", "data", "deploy/licenses"):
         for source in sorted((ROOT / directory).rglob("*")):
@@ -24,11 +24,17 @@ def stage(destination):
             if source.name.startswith("."):
                 continue
             files.append((source, source.relative_to(ROOT)))
-    for name in ("requirements.txt", "LICENSE", "scripts/cloud_start.py", "scripts/pull_cloud_model.py"):
+    for name in ("LICENSE",):
         files.append((ROOT / name, Path(name)))
-    for name in ("Dockerfile", "README.md"):
-        files.append((ROOT / "deploy/huggingface" / name, Path(name)))
-    files.append((ROOT / ".dockerignore", Path(".dockerignore")))
+    if runtime == "zerogpu":
+        for name in ("space_app.py", "requirements.txt", "README.md"):
+            files.append((ROOT / "deploy/zerogpu" / name, Path(name)))
+    else:
+        for name in ("requirements.txt", "scripts/cloud_start.py", "scripts/pull_cloud_model.py"):
+            files.append((ROOT / name, Path(name)))
+        for name in ("Dockerfile", "README.md"):
+            files.append((ROOT / "deploy/huggingface" / name, Path(name)))
+        files.append((ROOT / ".dockerignore", Path(".dockerignore")))
     for source, relative in files:
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -40,6 +46,7 @@ def stage(destination):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--space-id", help="Account/space-name; defaults to your-account/noor-islamic-assistant")
+    parser.add_argument("--runtime", choices=("docker", "zerogpu"), default="docker", help="zerogpu uses the free Gradio/PyTorch model runner")
     parser.add_argument("--update", action="store_true", help="Permit updating this explicitly selected existing Space")
     parser.add_argument("--dry-run", action="store_true", help="Validate the upload bundle without credentials or network")
     args = parser.parse_args()
@@ -49,7 +56,7 @@ def main():
         parser.error("Use an account/space-name ID.")
     with tempfile.TemporaryDirectory(prefix="noor-space-") as directory:
         destination = Path(directory)
-        count, size = stage(destination)
+        count, size = stage(destination, args.runtime)
         print(f"Cloud bundle: {count} files, {size:,} bytes; excludes credentials and model caches.")
         if args.dry_run:
             return 0
@@ -59,16 +66,24 @@ def main():
             return 2
         os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
         os.environ.setdefault("HF_HUB_DISABLE_IMPLICIT_TOKEN", "1")
-        from huggingface_hub import HfApi
+        from huggingface_hub import HfApi, SpaceHardware
 
         api = HfApi(token=token)
         try:
             account = api.whoami()["name"]
             space_id = args.space_id or f"{account}/noor-islamic-assistant"
-            api.create_repo(repo_id=space_id, repo_type="space", space_sdk="docker",
-                            private=False, exist_ok=args.update)
+            sdk = "gradio" if args.runtime == "zerogpu" else "docker"
+            if args.update:
+                info = api.space_info(space_id)
+                if info.sdk != sdk:
+                    print(f"The selected Space uses {info.sdk}; create a separate {sdk} Space.")
+                    return 1
+            else:
+                options = {"space_hardware": SpaceHardware.ZERO_A10G} if args.runtime == "zerogpu" else {}
+                api.create_repo(repo_id=space_id, repo_type="space", space_sdk=sdk,
+                                private=False, exist_ok=False, **options)
             api.upload_folder(repo_id=space_id, repo_type="space", folder_path=str(destination),
-                              commit_message="Deploy Noor cloud app with private Ollama and memory-only chats")
+                              commit_message=f"Deploy Noor {args.runtime} app with cited sources and memory-only chats")
         except Exception as error:
             # Error bodies can include network credentials or signed URLs.
             response = getattr(error, "response", None)
