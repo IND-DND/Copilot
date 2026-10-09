@@ -112,5 +112,11 @@ def test_index_and_assets_and_security_headers(client):
     assert response.status_code == 200
     assert "A little light" in response.text
     assert "script-src 'self'" in response.headers["content-security-policy"]
+    assert response.headers["cache-control"] == "no-store"
     for asset in ["app.js", "styles.css", "fonts.css", "favicon.svg"]:
-        assert client.get("/static/" + asset).status_code == 200
+        response = client.get("/static/" + asset)
+        assert response.status_code == 200
+        assert response.headers["cache-control"] == "no-store"
+    response = client.post("/api/chat", json={"question": "Quran 1:6"})
+    assert response.headers["cache-control"] == "no-store"
+    assert "set-cookie" not in response.headers

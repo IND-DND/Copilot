@@ -16,6 +16,7 @@ from urllib.parse import urlsplit
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--tag", default="noor-chatbot:local")
+    parser.add_argument("--dockerfile", default="Dockerfile")
     args = parser.parse_args()
     command = ["docker", "build", "--network=host", "--build-arg", "HTTPS_PROXY", "--build-arg", "HTTP_PROXY", "--build-arg", "NO_PROXY"]
     hosts = {urlsplit(os.environ[name]).hostname for name in ("HTTP_PROXY", "HTTPS_PROXY") if os.environ.get(name)}
@@ -28,7 +29,7 @@ def main():
     root = Path(__file__).resolve().parent.parent
     environment = dict(os.environ)
     environment.setdefault("DOCKER_CONFIG", "/workspace/.cache/noor-docker")
-    subprocess.run(command + ["--tag", args.tag, "."], cwd=root, env=environment, check=True)
+    subprocess.run(command + ["--file", args.dockerfile, "--tag", args.tag, "."], cwd=root, env=environment, check=True)
 
 
 if __name__ == "__main__":

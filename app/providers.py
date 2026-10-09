@@ -100,7 +100,10 @@ class LocalModel:
         if url.scheme not in {"http", "https"} or url.hostname not in {"127.0.0.1", "localhost", "::1"} or url.username or url.password or url.path not in {"", "/"} or url.query or url.fragment:
             return None, "unavailable"
         sources = evidence[:4]
-        schema = {"type": "object", "properties": {"summary": {"type": "string"}, "citations": {"type": "array", "items": {"type": "string"}}}, "required": ["summary", "citations"], "additionalProperties": False}
+        if not sources:
+            return None, "rejected"
+        evidence_ids = [s.id for s in sources]
+        schema = {"type": "object", "properties": {"summary": {"type": "string"}, "citations": {"type": "array", "items": {"type": "string", "enum": evidence_ids}, "minItems": 1}}, "required": ["summary", "citations"], "additionalProperties": False}
         payload = {
             "model": self.settings.ollama_model, "stream": False, "format": schema,
             "messages": [

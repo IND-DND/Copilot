@@ -102,6 +102,7 @@ async def test_optional_ollama_receives_evidence_and_system_prompt(knowledge):
     assert requests[0]["messages"][0]["role"] == "system"
     evidence = json.loads(requests[0]["messages"][1]["content"])["evidence"]
     assert evidence[0]["id"] == "quran-2-177"
+    assert requests[0]["format"]["properties"]["citations"]["items"]["enum"] == ["quran-2-177"]
 
 
 @pytest.mark.parametrize("summary,citations", [
